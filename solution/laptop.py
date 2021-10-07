@@ -24,6 +24,7 @@ DISPLAY_SIZE_IN_INCHES = {0: 12, 1: 13, 2: 14, 3: 15, 4: 17, 5: 20}
 
 @dataclass
 class Laptop:
+    name: str
     price: Decimal
     autonomy_in_hours: int
     weight: float
@@ -66,15 +67,21 @@ def evaluate_fitness(laptop: Laptop, ideal_laptop: Laptop) -> int:
     return fitness
 
 
-my_ideal_laptop = Laptop(price=2500, autonomy_in_hours=10, weight=2, display_size=15)
-bad_laptop = Laptop(price=1000, autonomy_in_hours=5, weight=1.5, display_size=12.3)
-good_laptop = Laptop(price=1500, autonomy_in_hours=7, weight=3, display_size=17)
-cheap_laptop = Laptop(price=500, autonomy_in_hours=11, weight=1, display_size=15)
-expensive_laptop = Laptop(price=2000, autonomy_in_hours=6, weight=3, display_size=15)
+my_ideal_laptop = Laptop(name='ideal', price=2500, autonomy_in_hours=10, weight=2, display_size=15)
 
 evaluate = functools.partial(evaluate_fitness, ideal_laptop=my_ideal_laptop)
 
-print('Bad Laptop score:', evaluate(bad_laptop))
-print('Good Laptop score:', evaluate(good_laptop))
-print('Cheap Laptop score:', evaluate(cheap_laptop))
-print('Expensive Laptop score:', evaluate(expensive_laptop))
+def best_match():
+    bad_laptop = Laptop(name='bad', price=1000, autonomy_in_hours=5, weight=1.5, display_size=12.3)
+    good_laptop = Laptop(name='good', price=1500, autonomy_in_hours=7, weight=3, display_size=17)
+    cheap_laptop = Laptop(name='cheap', price=500, autonomy_in_hours=11, weight=1, display_size=15)
+    expensive_laptop = Laptop(name='expensive', price=2000, autonomy_in_hours=6, weight=3, display_size=15)
+    print('Bad Laptop score:', evaluate(bad_laptop))
+    print('Good Laptop score:', evaluate(good_laptop))
+    print('Cheap Laptop score:', evaluate(cheap_laptop))
+    print('Expensive Laptop score:', evaluate(expensive_laptop))
+    laptops = [bad_laptop, good_laptop, cheap_laptop, expensive_laptop]
+    sorted_laptops = sorted(laptops, key=evaluate)
+    print('Best Match: ', sorted_laptops[0])
+
+best_match()
