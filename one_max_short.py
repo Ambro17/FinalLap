@@ -11,6 +11,8 @@ def evalOneMax(individual):
     return (sum(individual), )
 
 
+WEIGHTS = (-1.0, 2.0, 1.0)
+
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
 
@@ -49,7 +51,7 @@ def main():
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
     
-    pop, log = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=40, 
+    pop, log = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=40, # Limit amount of generations. Does not guarantee all 1s
                                    stats=stats, halloffame=hof, verbose=True)
     print(hof)
     print(stats)
