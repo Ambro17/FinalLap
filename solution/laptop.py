@@ -5,7 +5,7 @@ from typing import Optional
 
 
 class Database:
-    def exists(self, individual):
+    def exists(self, individual: 'Laptop'):
         return True
 
 
