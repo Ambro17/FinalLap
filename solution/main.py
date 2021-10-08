@@ -20,7 +20,7 @@ def database():
     pass
 
 
-def create_world():
+def create_world(attributes_array_len):
     creator.create("FitnessMax", base.Fitness, weights=(1.0,))
     creator.create("Individual", list, fitness=creator.FitnessMax)
 
@@ -33,7 +33,7 @@ def create_world():
         tools.initRepeat, 
         creator.Individual,
         world.attr_bool,
-        NUMBERS_ARRAY_LEN
+        attributes_array_len
     )
     world.register(
         "population", 

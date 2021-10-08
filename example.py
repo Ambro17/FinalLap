@@ -115,6 +115,6 @@ def main():
         print("  Max %s" % max(fits))
         print("  Avg %s" % mean)
         print("  Std %s" % std)
-        import time; time.sleep(0.5)
+        import time; time.sleep(0.25)
 
 main()
