@@ -14,14 +14,6 @@ def get_database():
     return Database()
 
 
-# Are this required?
-PRICE_LIMITS_PER_CATEGORY = {0: 250, 1: 500, 2: 750, 3: 1000, 4: 1500, 5: 2000, 6: 10_000}
-AUTONOMY_IN_HOURS = set(range(1, 24))
-WEIGHT_IN_KG = {0: 1, 1: 1.5, 2: 2, 3: 10}
-BRAND = {'APPLE', 'MICROSOFT', 'ACER', 'ASUS', 'MSI', 'HP'}
-DISPLAY_SIZE_IN_INCHES = {0: 12, 1: 13, 2: 14, 3: 15, 4: 17, 5: 20}
-
-
 @dataclass
 class Laptop:
     name: str
@@ -67,11 +59,14 @@ def evaluate_fitness(laptop: Laptop, ideal_laptop: Laptop) -> int:
     return fitness
 
 
-my_ideal_laptop = Laptop(name='ideal', price=2500, autonomy_in_hours=10, weight=2, display_size=15)
-
-evaluate = functools.partial(evaluate_fitness, ideal_laptop=my_ideal_laptop)
-
 def best_match():
+    # Create your ideal laptop
+    my_ideal_laptop = Laptop(name='ideal', price=2500, autonomy_in_hours=10, weight=2, display_size=15)
+
+    # Freeze the argument of the ideal laptop in the evaluate function
+    # So that it takes only one argument, as expected by deap
+    evaluate = functools.partial(evaluate_fitness, ideal_laptop=my_ideal_laptop)
+
     bad_laptop = Laptop(name='bad', price=1000, autonomy_in_hours=5, weight=1.5, display_size=12.3)
     good_laptop = Laptop(name='good', price=1500, autonomy_in_hours=7, weight=3, display_size=17)
     cheap_laptop = Laptop(name='cheap', price=500, autonomy_in_hours=11, weight=1, display_size=15)
