@@ -15,7 +15,7 @@ class Laptop:
 def initialize_entities():
     """Create entities required for the genetic algorithm
 
-    - Individual with fitness, speed and position attributes
+    - Individual with fitness, and domain attributes
     - Function that creates individuals given a set of attributes (population generator)
     """
     toolbox = base.Toolbox()
@@ -28,8 +28,9 @@ def initialize_entities():
         fitness=creator.FitnessMax,
         __str__=lambda self: f'Laptop(name={self.name}, price={self.price})')
 
-
     # Create function that dynamically creates individuals of a population based on same criteria
+    # In this case the criteria is hardcoding params
+    # But it will be a method that reads a laptopt database and generates from there
     def create_individual(creator_class: Type[Laptop], name, price):
         return creator_class(name=name, price=price)
 
