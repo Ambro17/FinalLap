@@ -11,6 +11,14 @@ Las características que serán evaluadas para encontrar la notebook recomendada
 - Marca (M)
 - Tamaño de Pantalla (T)
 
+## TODO
+- [ ] Get collection of laptops to populate database
+- [ ] Create mate algorithm (Should we allow invalid laptops? That is, those not in db?)
+- [ ] Create mutate algorithm (Should we allow invalid laptops? That is, those not in db?)
+- [ ] Create select algoritm
+- [ ] Condense into runnable script that executes the genetic algorithm
+
+
 ## Implementación
 
 Mediante la construcción de una base de datos de computadoras,
