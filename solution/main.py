@@ -10,6 +10,7 @@ Los parámetros a evaluar son
 - Cantidad de Requisitos Incumplidos (X)
 """
 import random
+import time
 
 from deap import base
 from deap import creator
@@ -85,26 +86,22 @@ def main():
         offspring = world.select(population, len(population))
 
         # Clone the selected individuals
-        offspring = list(map(world.clone, offspring))        
+        offspring = list(map(world.clone, offspring))
 
-        for child1, child2 in zip(offspring[::2], offspring[1::2]):
-            if random.random() < mate_probability:
-                world.mate(child1, child2)
-                del child1.fitness.values
-                del child2.fitness.values
+        # Mate
+        offspring = mate(mate_probability, offspring)
 
-        for mutant in offspring:
-            if random.random() < mutation_probability:
-                world.mutate(mutant)
-                del mutant.fitness.values
+        # Mutate
+        offspring = mutate(mutation_probability, offspring)
 
-        # Once you del individual.fitness.values the fitness is marked as invalid.
+        # Once you del individual.fitness.values (after mate or mutate) the fitness is marked as invalid.
         # So we need to recalculate it for those individuals
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
         fitnesses = map(world.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
 
+        # Replace population by offspring
         population[:] = offspring
 
         # Gather all the fitnesses in one list and print the stats
@@ -119,6 +116,29 @@ def main():
         print("  Max %s" % max(fits))
         print("  Avg %s" % mean)
         print("  Std %s" % std)
-        import time; time.sleep(0.5)
 
-main()
+    print('#### Required Iterations:', iterations)
+    time.sleep(0.20)
+    return iterations
+
+
+def mutate(mutation_probability, offspring):
+    for mutant in offspring:
+        if random.random() < mutation_probability:
+            world.mutate(mutant)
+            del mutant.fitness.values
+
+    return offspring
+
+
+def mate(mate_probability, offspring):
+    for child1, child2 in zip(offspring[::2], offspring[1::2]):
+        if random.random() < mate_probability:
+            world.mate(child1, child2)
+            del child1.fitness.values
+            del child2.fitness.values
+
+    return offspring
+
+iterations_duration = [main() for x in range(15)]
+print('Average', sum(iterations_duration)/len(iterations_duration))
