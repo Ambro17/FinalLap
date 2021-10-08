@@ -1,16 +1,14 @@
+import dataclasses
 from typing import Type
 from pprint import pprint
 from deap import base
 from deap import creator
 
 
+@dataclasses.dataclass
 class Particle:
-    def __init__(self, position, speed):
-        self.position = position
-        self.speed = speed
-
-    def __repr__(self):
-        return f'{self.__class__.__name__!s}(position={self.position}, speed={self.speed})'
+    position: int
+    speed: int
 
 
 def initialize_entities():
