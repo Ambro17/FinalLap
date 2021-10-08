@@ -1,13 +1,5 @@
 """
-La función de evaluación deberá ser un array que minimize infracciones y maximice requisitos cumplidos.
-Los parámetros a evaluar son
-- Precio ($)
-- Uso (Básico, Diseñador, Programador, Gaming) (U)
-- Autonomía de la Batería (A)
-- Peso (P)
-- Marca (M)
-- Tamaño de Pantalla (T)
-- Cantidad de Requisitos Incumplidos (X)
+Tutorial: https://deap.readthedocs.io/en/master/examples/ga_onemax.html
 """
 import random
 
@@ -15,57 +7,61 @@ from deap import base
 from deap import creator
 from deap import tools
 
+# Individuals will be list of ints
+# Generate population using them
+# Add some functions and operators to evolve
 
-def database():
-    pass
+# Create evaluation function with only one weight
+creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 
+# Create Individual class with a fitness attribute 
+creator.create("Individual", list, fitness=creator.FitnessMax)
 
-def create_world():
-    creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-    creator.create("Individual", list, fitness=creator.FitnessMax)
+toolbox = base.Toolbox()
+# Generate random ints either 0 or 1
+toolbox.register("attr_bool", random.randint, 0, 1)
 
-    world = base.Toolbox()
-
-    # Generate random ints either 0 or 1
-    world.register("attr_bool", random.randint, 0, 1)
-    world.register(
-        "individual",
-        tools.initRepeat, 
-        creator.Individual,
-        world.attr_bool,
-        NUMBERS_ARRAY_LEN
-    )
-    world.register(
-        "population", 
-        tools.initRepeat, 
-        list, 
-        world.individual
-        # Notice we don't fix the last argument of 
-        # tools.initRepeat, that is the amount of individuals of our population 
-    )
-    return world
-
+# Enable toolbox.Individual to generate an 'Individual' with a
+# a list of 100 random integers either 1 or 0
+"""
+Equivalent to
+creator.Individual(toolbox.attr_bool, 100) -> 
+[0 1 1 0 0 0 1 ... n] where n=100 of random 0s or 1s
+"""
 NUMBERS_ARRAY_LEN = 100 
-world = create_world(NUMBERS_ARRAY_LEN)
-
+toolbox.register(
+    "individual",
+    tools.initRepeat, 
+    creator.Individual,
+    toolbox.attr_bool,
+    NUMBERS_ARRAY_LEN
+)
+toolbox.register(
+    "population", 
+    tools.initRepeat, 
+    list, 
+    toolbox.individual
+    # Notice we don't fix the last argument of 
+    # tools.initRepeat, that is the amount of individuals of our population 
+)
 
 def evaluate_individual(individual):
     # As it inherits from list, sum works. 
     # Why a tuple? Because of weights=(1.0,) on our FitnessMax function
     return (sum(individual), )
 
-world.register("evaluate", evaluate_individual)
-world.register("mate", tools.cxTwoPoint) # Cruza
-world.register("mutate", tools.mutFlipBit, indpb=0.05) # indpb: Independent probability of each integer of being mutated
-world.register("select", tools.selTournament, tournsize=3)
+toolbox.register("evaluate", evaluate_individual)
+toolbox.register("mate", tools.cxTwoPoint) # Cruza
+toolbox.register("mutate", tools.mutFlipBit, indpb=0.05) # indpb: Independent probability of each integer of being mutated
+toolbox.register("select", tools.selTournament, tournsize=3)
 
 
 def main():
     # Generate population with our partially initialized population function.
-    population = world.population(n=300)
+    population = toolbox.population(n=300)
     
     # Calculate fitness for each individual
-    fitnesses = map(world.evaluate, population)
+    fitnesses = map(toolbox.evaluate, population)
     for individual, fitness_values in zip(population, fitnesses):
         individual.fitness.values = fitness_values
 
@@ -82,26 +78,26 @@ def main():
         print("-- Generation %i --" % iterations)
 
         # Generate a new population of the same length
-        offspring = world.select(population, len(population))
+        offspring = toolbox.select(population, len(population))
 
         # Clone the selected individuals
-        offspring = list(map(world.clone, offspring))        
+        offspring = list(map(toolbox.clone, offspring))        
 
         for child1, child2 in zip(offspring[::2], offspring[1::2]):
             if random.random() < mate_probability:
-                world.mate(child1, child2)
+                toolbox.mate(child1, child2)
                 del child1.fitness.values
                 del child2.fitness.values
 
         for mutant in offspring:
             if random.random() < mutation_probability:
-                world.mutate(mutant)
+                toolbox.mutate(mutant)
                 del mutant.fitness.values
 
-        # Once you del individual.fitness.values the fitness is marked as invalid.
-        # So we need to recalculate it for those individuals
+        # Now that individuals changed, the mutation is no longer representative.
+        # Let's recalculate it
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-        fitnesses = map(world.evaluate, invalid_ind)
+        fitnesses = map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
 
