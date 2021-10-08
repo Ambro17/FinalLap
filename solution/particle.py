@@ -1,4 +1,5 @@
 import dataclasses
+import random
 from typing import Type
 from pprint import pprint
 from deap import base
@@ -6,9 +7,9 @@ from deap import creator
 
 
 @dataclasses.dataclass
-class Particle:
-    position: int
-    speed: int
+class Laptop:
+    name: int
+    price: int
 
 
 def initialize_entities():
@@ -19,25 +20,25 @@ def initialize_entities():
     """
     toolbox = base.Toolbox()
 
-    # Create Particle class with fitness attribute to save individual aptitude
+    # Create Laptop class with fitness attribute to save individual aptitude
     creator.create("FitnessMax", base.Fitness, weights=(1.0, ))
     creator.create(
-        "Particle",
-        Particle,
+        "Laptop",
+        Laptop,
         fitness=creator.FitnessMax,
-        __str__=lambda self: f'Particle(speed={self.speed}, position={self.position})')
+        __str__=lambda self: f'Laptop(name={self.name}, price={self.price})')
 
 
     # Create function that dynamically creates individuals of a population based on same criteria
-    def create_individual(creator_class: Type[Particle], position, speed):
-        return creator_class(position=position, speed=speed)
+    def create_individual(creator_class: Type[Laptop], name, price):
+        return creator_class(name=name, price=price)
 
-    toolbox.register("particle", create_individual, creator.Particle)
+    toolbox.register("laptop", create_individual, creator.Laptop)
 
     return toolbox
 
 toolbox = initialize_entities()
-population = [toolbox.particle(position=x, speed=1) for x in range(10)]
+population = [toolbox.laptop(name=f'Laptop {x}', price=random.randint(500, 1500)) for x in range(10)]
 print('Population:', end=' \n')
 pprint(population)
 p = population[0]
