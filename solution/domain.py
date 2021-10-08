@@ -15,6 +15,14 @@ class Database:
         """Return a random laptop from the database"""
         return Laptop('Name', 1000, 12, 1, 15)
 
+    def mate(self, one_laptop, other_laptop):
+        """Return an existing laptop with intersection of attributes from the two laptops"""
+        pass
+
+    def mutate(self, one_laptop):
+        """Change the laptop attributes to match another existing laptop"""
+        pass
+
 
 @dataclass
 class Laptop:
