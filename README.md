@@ -26,14 +26,14 @@ Linux:
 python3 -m venv .venv && \
 source .venv/bin/activate && \
 pip install requirements.txt && \
-python app.py
+python example.py
 ```
 Windows: 
 ```
 python3 -m venv .venv && \
 .venv/Scripts/activate && \
 pip install requirements.txt && \
-python app.py
+python example.py
 ```
 Docker:
 ```
