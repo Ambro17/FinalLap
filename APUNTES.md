@@ -15,14 +15,3 @@ def evaluate_individual(individual):
     requisitos_incumplidos = calcular_reqs_incumplidos(individual)
     if requisito_incumplidos:
         penalizar len(requisitos), ...
-
-
-
-
-(-1,  1,  1,  1,  1,  1,  1)
-
-| X | $ | U | A | P | M | T |
-|---|---|---|---|---|---|---|
-|-1 | 1 |   |   |   | 5 |   |
-|   |   | 2 |   | 4 |   | 1 |
-|   |   |   | 3 |   |   | 1 |
