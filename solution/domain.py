@@ -129,7 +129,7 @@ def get_best_match():
     # So that it takes only one argument, as expected by deap library
     evaluate = functools.partial(evaluate_fitness, ideal_laptop=my_ideal_laptop, db=Database())
 
-    bad_laptop = Laptop(name='bad Laptop', price=1000, autonomy_in_hours=5, weight=1.5, display_size=12.3)
+    bad_laptop = Laptop(name='bad Laptop', price=1000, autonomy_in_hours=5, weight=10, display_size=12.3)
     good_laptop = Laptop(name='good Laptop', price=1500, autonomy_in_hours=7, weight=3, display_size=17)
     cheap_laptop = Laptop(name='cheap Laptop', price=500, autonomy_in_hours=11, weight=1, display_size=15)
     expensive_laptop = Laptop(name='expensive Laptop', price=2000, autonomy_in_hours=6, weight=3, display_size=15)
@@ -140,7 +140,7 @@ def get_best_match():
     print('Expensive Laptop score:', evaluate(expensive_laptop))
 
     laptops = [bad_laptop, good_laptop, cheap_laptop, expensive_laptop]
-    sorted_laptops = sorted(laptops, key=evaluate)
+    sorted_laptops = sorted(laptops, key=evaluate, reverse=True)
     print('Sorted Laptops by score', list(map(str, sorted_laptops)))
     print('Best Match: ', sorted_laptops[0])
 
