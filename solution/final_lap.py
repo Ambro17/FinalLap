@@ -48,6 +48,7 @@ def create_world():
 NUMBERS_ARRAY_LEN = 100 
 world = create_world(NUMBERS_ARRAY_LEN)
 
+
 def evaluate_individual(individual):
     # As it inherits from list, sum works. 
     # Why a tuple? Because of weights=(1.0,) on our FitnessMax function
@@ -97,8 +98,8 @@ def main():
                 world.mutate(mutant)
                 del mutant.fitness.values
 
-        # Now that individuals changed, the mutation is no longer representative.
-        # Let's recalculate it
+        # Once you del individual.fitness.values the fitness is marked as invalid.
+        # So we need to recalculate it for those individuals
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
         fitnesses = map(world.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
