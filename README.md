@@ -36,5 +36,9 @@ pip install requirements.txt && \
 python app.py
 ```
 Docker:
-
-`docker run -it --rm finallap params.json`
+```
+docker build . -t finallap && docker run -it --rm finallap
+python example.py
+python solution/domain.py
+python solution/main.py
+```
