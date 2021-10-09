@@ -1,19 +1,22 @@
-from dataclasses import dataclass
 import functools
 import random
-from typing import Type, Optional
-from pprint import pprint
+from typing import Type, List
 from deap import base
 from deap import creator
 
+from solution.laptop_loader import load_laptops, Laptop
+
 
 class Database:
-    def exists(self, individual: 'Laptop'):
-        return True
+    def __init__(self, laptops: List['Laptop']):
+        self.laptops = laptops
 
-    def get(self) -> 'Laptop':
+    def exists(self, individual: 'Laptop'):
+        return individual in self.laptops
+
+    def get_random(self) -> 'Laptop':
         """Return a random laptop from the database"""
-        return Laptop('Name', 1000, 12, 1, 15)
+        return random.choice(self.laptops)
 
     def mate(self, one_laptop, other_laptop):
         """Return an existing laptop with intersection of attributes from the two laptops"""
@@ -22,19 +25,6 @@ class Database:
     def mutate(self, one_laptop):
         """Change the laptop attributes to match another existing laptop"""
         pass
-
-
-@dataclass
-class Laptop:
-    name: str
-    price: int
-    autonomy_in_hours: int
-    weight: float
-    display_size: float
-    brand: Optional[str] = 'ANY'
-
-    def __str__(self) -> str:
-        return self.name
 
 
 def evaluate_fitness(laptop: Laptop, ideal_laptop: Laptop, db: Database) -> int:
@@ -102,47 +92,43 @@ def initialize_entities():
 
 
 
-def create_population_and_validate_fitness(toolbox):
-    population = [toolbox.laptop(
-        name=f'Laptop {x}', price=random.randint(500, 1500), autonomy_in_hours=10, weight=2.5, display_size=15
-    ) for x in range(10)]
-    print('Population:', end=' \n')
-    pprint(population)
-    p = population[0]
-    print('Individual: ', p)
-    p.fitness.values = (1, )
-    assert p.fitness.valid is True
-    del p.fitness.values
-    assert p.fitness.valid is False
-    p.fitness.values = (10, )
-    print('Fitness: ', p.fitness)
-
-
-print('Creating population and validating some things ✨')
-create_population_and_validate_fitness(initialize_entities())
-
 def get_best_match():
     # Create your ideal laptop
-    my_ideal_laptop = Laptop(name='ideal', price=2500, autonomy_in_hours=10, weight=2, display_size=15)
+    extra_args = {
+        "cpu": 'i5',
+        "has_dedicated_gpu": False,
+        "ram": 8,
+        "storage_in_gb": 512,
+        "operating_system": "Windows",
+    }
+    my_ideal_laptop = Laptop(name='ideal', price=2500, autonomy_in_hours=10, weight=2, display_size=15, **extra_args)
+
+    # Load laptops from csv
+    laptops = load_laptops()
 
     # Freeze the argument of the ideal laptop in the evaluate function
     # So that it takes only one argument, as expected by deap library
-    evaluate = functools.partial(evaluate_fitness, ideal_laptop=my_ideal_laptop, db=Database())
+    evaluate = functools.partial(evaluate_fitness, ideal_laptop=my_ideal_laptop, db=Database(laptops))
 
-    bad_laptop = Laptop(name='bad Laptop', price=1000, autonomy_in_hours=5, weight=10, display_size=12.3)
-    good_laptop = Laptop(name='good Laptop', price=1500, autonomy_in_hours=7, weight=3, display_size=17)
-    cheap_laptop = Laptop(name='cheap Laptop', price=500, autonomy_in_hours=11, weight=1, display_size=15)
-    expensive_laptop = Laptop(name='expensive Laptop', price=2000, autonomy_in_hours=6, weight=3, display_size=15)
+    print(laptops[0].name, evaluate(laptops[0]))
+    print(laptops[1].name, evaluate(laptops[1]))
+    print(laptops[2].name, evaluate(laptops[2]))
 
-    print('Bad Laptop score:', evaluate(bad_laptop))
-    print('Good Laptop score:', evaluate(good_laptop))
-    print('Cheap Laptop score:', evaluate(cheap_laptop))
-    print('Expensive Laptop score:', evaluate(expensive_laptop))
-
-    laptops = [bad_laptop, good_laptop, cheap_laptop, expensive_laptop]
-    sorted_laptops = sorted(laptops, key=evaluate, reverse=True)
+    laps = laptops[:3]
+    sorted_laptops = sorted(laps, key=evaluate, reverse=True)
     print('Sorted Laptops by score', list(map(str, sorted_laptops)))
     print('Best Match: ', sorted_laptops[0])
 
 print('Choosing best laptop 🪄')
 get_best_match()
+
+
+def load_laptops2():
+    laptops = load_laptops()
+    db = Database(laptops=laptops)
+    assert db.exists(laptops[-1])
+    assert db.exists(laptops[3])
+    print('Random laptop:', db.get_random())
+    assert isinstance(db.get_random(), type(laptops[0]))
+
+load_laptops2()

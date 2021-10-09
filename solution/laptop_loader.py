@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional
 import dataclasses
 
+
 class EnhancedJSONEncoder(json.JSONEncoder):
     def default(self, object):
         if is_dataclass(object):
@@ -27,11 +28,14 @@ class Laptop:
     ram: int
     storage_in_gb: int
     operating_system: str
-    gpu: bool = False
     brand: Optional[str] = 'ANY'
 
     def __str__(self):
-        return f'{self.brand} {self.name} {self.cpu} {self.ram} {self.storage_in_gb} {self.display_size} {self.operating_system}'
+        return (
+            f'{self.brand} {self.name} {self.cpu} {self.ram}GB '
+            f'{self.storage_in_gb}GB {self.display_size}" {self.operating_system}'
+        )
+
 
 def parse_storage(storage_expression):
     """Parse storage in GB"""
@@ -40,34 +44,32 @@ def parse_storage(storage_expression):
     except ValueError:
         return int(storage_expression.split('TB')[0]) * 1024
 
-laptops = []
-with open(PARENT / 'laptops_2019.csv', newline='') as csvfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-        try:
-            laptops.append(
-                Laptop(
-                    name=row['Model Name'],
-                    price=int(float(row['Price (Euros)'].replace(',', '.')) * 1.16), # Replace comma by dot
-                    autonomy_in_hours=10,  # TODO: Figure out a way to infer it.
-                    weight=float(row['Weight'].split('k')[0]),  # '1kg -> 2; 4kks -> 4'
-                    display_size=float(row['Screen Size'].replace('"', '')),  # Remove inches symbol
-                    brand=row['Manufacturer'],
-                    cpu=row['CPU'],
-                    has_dedicated_gpu=bool('Intel' not in row['GPU']),
-                    ram=int(row['RAM'].split('GB')[0]),
-                    storage_in_gb=parse_storage(row['Storage']),
-                    operating_system=row['Operating System']
+
+def load_laptops():
+    laptops = []
+    with open(PARENT / 'laptops_2019.csv', newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            try:
+                laptops.append(
+                    Laptop(
+                        name=row['Model Name'],
+                        price=int(float(row['Price (Euros)'].replace(',', '.')) * 1.16),  # Replace comma by dot
+                        autonomy_in_hours=10,  # TODO: Figure out a way to infer it.
+                        weight=float(row['Weight'].split('k')[0]),  # '1kg -> 2; 4kks -> 4'
+                        display_size=float(row['Screen Size'].replace('"', '')),  # Remove inches symbol
+                        brand=row['Manufacturer'],
+                        cpu=row['CPU'],
+                        has_dedicated_gpu=bool('Intel' not in row['GPU']),
+                        ram=int(row['RAM'].split('GB')[0]),
+                        storage_in_gb=parse_storage(row['Storage']),
+                        operating_system=row['Operating System']
+                    )
                 )
-            )
 
-        except ValueError as e:
-            print(repr(e))
-            print(row)
-            sys.exit(1)
-
+            except ValueError as e:
+                print(repr(e))
+                print(row)
+                sys.exit(1)
     laptops.sort(key=lambda x: (x.brand, x.name))
-
-
-with open('results.json', 'w') as f:
-    json.dump(laptops, f, cls=EnhancedJSONEncoder, indent=2, sort_keys=True)
+    return laptops
