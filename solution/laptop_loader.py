@@ -44,6 +44,8 @@ with open(PARENT / 'laptops_2019.csv', newline='') as csvfile:
             print(row)
             sys.exit(1)
 
+    laptops.sort(key=lambda x: (x.brand, x.name))
+
 
 with open('results.json', 'w') as f:
-    json.dump(laptops, f, cls=EnhancedJSONEncoder, indent=2)
+    json.dump(laptops, f, cls=EnhancedJSONEncoder, indent=2, sort_keys=True)
