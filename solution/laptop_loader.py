@@ -14,6 +14,7 @@ class EnhancedJSONEncoder(json.JSONEncoder):
 
 PARENT = Path(__file__).absolute().parent
 
+
 @dataclass
 class Laptop:
     name: str
@@ -21,8 +22,23 @@ class Laptop:
     autonomy_in_hours: int
     weight: float
     display_size: float
+    cpu: str
+    has_dedicated_gpu: bool
+    ram: int
+    storage_in_gb: int
+    operating_system: str
+    gpu: bool = False
     brand: Optional[str] = 'ANY'
 
+    def __str__(self):
+        return f'{self.brand} {self.name} {self.cpu} {self.ram} {self.storage_in_gb} {self.display_size} {self.operating_system}'
+
+def parse_storage(storage_expression):
+    """Parse storage in GB"""
+    try:
+        return int(storage_expression.split('GB')[0])
+    except ValueError:
+        return int(storage_expression.split('TB')[0]) * 1024
 
 laptops = []
 with open(PARENT / 'laptops_2019.csv', newline='') as csvfile:
@@ -37,8 +53,14 @@ with open(PARENT / 'laptops_2019.csv', newline='') as csvfile:
                     weight=float(row['Weight'].split('k')[0]),  # '1kg -> 2; 4kks -> 4'
                     display_size=float(row['Screen Size'].replace('"', '')),  # Remove inches symbol
                     brand=row['Manufacturer'],
+                    cpu=row['CPU'],
+                    has_dedicated_gpu=bool('Intel' not in row['GPU']),
+                    ram=int(row['RAM'].split('GB')[0]),
+                    storage_in_gb=parse_storage(row['Storage']),
+                    operating_system=row['Operating System']
                 )
             )
+
         except ValueError as e:
             print(repr(e))
             print(row)
