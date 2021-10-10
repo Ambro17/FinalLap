@@ -13,8 +13,6 @@ class EnhancedJSONEncoder(json.JSONEncoder):
             return dataclasses.asdict(object)
         return super().default(object)
 
-PARENT = Path(__file__).absolute().parent
-
 
 @dataclass
 class Laptop:
@@ -45,9 +43,9 @@ def parse_storage(storage_expression):
         return int(storage_expression.split('TB')[0]) * 1024
 
 
-def load_laptops():
+def load_laptops(filepath):
     laptops = []
-    with open(PARENT / 'laptops_2019.csv', newline='') as csvfile:
+    with open(filepath, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             try:
@@ -73,3 +71,6 @@ def load_laptops():
                 sys.exit(1)
     laptops.sort(key=lambda x: (x.brand, x.name))
     return laptops
+
+LAPTOPS_CSV = Path(__file__).absolute().parent / 'laptops_2019.csv'
+#load_laptops(LAPTOPS_CSV)

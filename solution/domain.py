@@ -14,6 +14,10 @@ class Database:
     def exists(self, individual: 'Laptop'):
         return individual in self.laptops
 
+    def find_by_spec(self, spec: 'LaptopSpec'):
+        return self.laptops[0]
+
+
     def get_random(self) -> 'Laptop':
         """Return a random laptop from the database"""
         return random.choice(self.laptops)
