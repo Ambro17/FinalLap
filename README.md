@@ -12,10 +12,10 @@ Las características que serán evaluadas para encontrar la notebook recomendada
 - Tamaño de Pantalla (T)
 
 ## TODO
-- [ ] Get collection of laptops to populate database
-- [ ] Create mate algorithm (Should we allow invalid laptops? That is, those not in db?)
-- [ ] Create mutate algorithm (Should we allow invalid laptops? That is, those not in db?)
-- [ ] Create select algoritm
+- [x] Get collection of laptops to populate database - ✅ Done from csv
+- [ ] Create mate algorithm
+- [x] Create mutate algorithm (Should we allow invalid laptops? That is, those not in db?) - ✅ Not required
+- [ ] Create select algoritm (Ojo a que optimice y no quede clavado)
 - [ ] Condense into runnable script that executes the genetic algorithm
 
 
@@ -33,14 +33,14 @@ Linux:
 ```
 python3 -m venv .venv && \
 source .venv/bin/activate && \
-pip install requirements.txt && \
+pip install -r requirements.txt && \
 python example.py
 ```
 Windows: 
 ```
 python3 -m venv .venv && \
 .venv/Scripts/activate && \
-pip install requirements.txt && \
+pip install -r requirements.txt && \
 python example.py
 ```
 Docker:
