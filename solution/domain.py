@@ -113,8 +113,6 @@ get_best_match()
 def load_laptops2():
     laptops = load_laptops()
     db = Database(laptops=laptops)
-    assert db.exists(laptops[-1])
-    assert db.exists(laptops[3])
     print('Random laptop:', db.get_random())
     assert isinstance(db.get_random(), type(laptops[0]))
 
