@@ -4,15 +4,12 @@ from typing import Type, List
 from deap import base
 from deap import creator
 
-from solution.laptop_loader import load_laptops, Laptop
+from laptop_loader import load_laptops, Laptop
 
 
 class Database:
     def __init__(self, laptops: List['Laptop']):
         self.laptops = laptops
-
-    def exists(self, individual: 'Laptop'):
-        return individual in self.laptops
 
     def get_random(self) -> 'Laptop':
         """Return a random laptop from the database"""
@@ -20,22 +17,16 @@ class Database:
 
     def mate(self, one_laptop, other_laptop):
         """Return an existing laptop with intersection of attributes from the two laptops"""
-        pass
-
-    def mutate(self, one_laptop):
-        """Change the laptop attributes to match another existing laptop"""
-        pass
+        # Elijo una DISTINA a estas dos, que exista.
+        # Va a ser mejor o peor?
 
 
-def evaluate_fitness(laptop: Laptop, ideal_laptop: Laptop, db: Database) -> int:
+def evaluate_fitness(laptop: Laptop, ideal_laptop: Laptop) -> int:
     """Evaluate how good of a match is a laptop against a given laptop
 
     It is expected to freeze the ideal_laptop argument once it's defined by the user
     That way, this function accepts a single argument representing the individual as expected by DEAP
     """
-    if not db.exists(laptop):
-        return -100
-
     fitness = 0
     if laptop.price > ideal_laptop.price:
         fitness -= 1
@@ -57,10 +48,12 @@ def evaluate_fitness(laptop: Laptop, ideal_laptop: Laptop, db: Database) -> int:
     else:
         fitness += 1
 
-    if laptop.brand != 'ANY' and laptop.brand != ideal_laptop.brand:
-        fitness -= 1
-    else:
-        fitness += 1
+    if laptop.brand != 'ANY':
+        if laptop.brand != ideal_laptop.brand:
+            fitness -= 1
+        else:
+            fitness += 1
+
 
     return fitness
 
@@ -91,7 +84,6 @@ def initialize_entities():
     return toolbox
 
 
-
 def get_best_match():
     # Create your ideal laptop
     extra_args = {
@@ -108,7 +100,7 @@ def get_best_match():
 
     # Freeze the argument of the ideal laptop in the evaluate function
     # So that it takes only one argument, as expected by deap library
-    evaluate = functools.partial(evaluate_fitness, ideal_laptop=my_ideal_laptop, db=Database(laptops))
+    evaluate = functools.partial(evaluate_fitness, ideal_laptop=my_ideal_laptop)
 
     print(laptops[0].name, evaluate(laptops[0]))
     print(laptops[1].name, evaluate(laptops[1]))
