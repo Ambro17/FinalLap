@@ -3,7 +3,6 @@ La función de evaluación deberá ser un array que minimize infracciones y maxi
 Los parámetros a evaluar son
 - Precio ($)
 - Uso (Básico, Diseñador, Programador, Gaming) (U)
-- Autonomía de la Batería (A)
 - Peso (P)
 - Marca (M)
 - Tamaño de Pantalla (T)

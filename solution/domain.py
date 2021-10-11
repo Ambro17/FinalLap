@@ -43,11 +43,6 @@ def evaluate_fitness(laptop: Laptop, ideal_laptop: Laptop) -> int:
     else:
         fitness += 0.5
 
-    if laptop.autonomy_in_hours < ideal_laptop.autonomy_in_hours:
-        fitness -= 1
-    else:
-        fitness += 1
-
     if laptop.brand != 'ANY':
         if laptop.brand != ideal_laptop.brand:
             fitness -= 1
@@ -93,7 +88,7 @@ def get_best_match():
         "storage_in_gb": 512,
         "operating_system": "Windows",
     }
-    my_ideal_laptop = Laptop(name='ideal', price=2500, autonomy_in_hours=10, weight=2, display_size=15, **extra_args)
+    my_ideal_laptop = Laptop(name='ideal', price=2500, weight=2, display_size=15, **extra_args)
 
     # Load laptops from csv
     laptops = load_laptops()

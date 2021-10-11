@@ -20,7 +20,6 @@ PARENT = Path(__file__).absolute().parent
 class Laptop:
     name: str
     price: int
-    autonomy_in_hours: int
     weight: float
     display_size: float
     cpu: str
@@ -55,7 +54,6 @@ def load_laptops():
                     Laptop(
                         name=row['Model Name'],
                         price=int(float(row['Price (Euros)'].replace(',', '.')) * 1.16),  # Replace comma by dot
-                        autonomy_in_hours=10,  # TODO: Figure out a way to infer it.
                         weight=float(row['Weight'].split('k')[0]),  # '1kg -> 2; 4kks -> 4'
                         display_size=float(row['Screen Size'].replace('"', '')),  # Remove inches symbol
                         brand=row['Manufacturer'],
