@@ -50,10 +50,10 @@ def evaluate_individual(individual):
     # Why a tuple? Because of weights=(1.0,) on our FitnessMax function
     return (sum(individual), )
 
-toolbox.register("evaluate", evaluate_individual)
-toolbox.register("mate", tools.cxTwoPoint) # Cruza
-toolbox.register("mutate", tools.mutFlipBit, indpb=0.05) # indpb: Independent probability of each integer of being mutated
-toolbox.register("select", tools.selTournament, tournsize=3)
+toolbox.register("evaluate", evaluate_individual) # DONE
+toolbox.register("mate", tools.cxTwoPoint)        # TODO
+toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)  # indpb: Independent probability of each integer of being mutated # Evitarlo, pb=0
+toolbox.register("select", tools.selTournament, tournsize=3)  # TODO
 
 
 def main():
@@ -81,7 +81,7 @@ def main():
         offspring = toolbox.select(population, len(population))
 
         # Clone the selected individuals
-        offspring = list(map(toolbox.clone, offspring))        
+        offspring = list(map(toolbox.clone, offspring))
 
         for child1, child2 in zip(offspring[::2], offspring[1::2]):
             if random.random() < mate_probability:
