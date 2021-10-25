@@ -1,9 +1,9 @@
 import functools
 import random
-from typing import Type, List
+from typing import Type, List, Tuple
 from deap import base
 from deap import creator
-from pprint import pprint
+from deap import tools
 
 from laptop_loader import load_laptops, Laptop
 
@@ -22,20 +22,12 @@ class Database:
         # Va a ser mejor o peor?
 
 
-def mate(db: Database, laptop1: Laptop, laptop2: Laptop):
-    # 10 00
-    # 01 11
-    # --|--
-    # 10 11
-    # Parecido a L1
-    # Parecido a L2
-    """
-    Op 1.
-    Agarrar 10 laptops
-    Evaluar la similitud contra la L1 y la L2
-    Quedarnos con las mas parecida a ambas
-    """
-    laptops_bag = [db.get_random() for _ in range(200)]  # TODO: Modificar si optimiza demasiado rapido
+toolbox = base.Toolbox()
+db = Database(laptops=load_laptops())
+
+
+def mate(laptop1: Laptop, laptop2: Laptop):
+    laptops_bag = [db.get_random() for _ in range(50)]
     laptops_by_similarity = [
         (
             candidate,
@@ -45,16 +37,18 @@ def mate(db: Database, laptop1: Laptop, laptop2: Laptop):
         for candidate in laptops_bag
     ]
 
-    similar_a_1 = max(laptops_by_similarity, key=lambda tupla: tupla[1])
-    similar_a_2 = max(laptops_by_similarity, key=lambda tupla: tupla[2])
-    return similar_a_1[0], similar_a_2[0]
+    laptops_por_similitud = sorted(laptops_by_similarity, key=lambda tupla: tupla[1][0])
+    laptops_por_similitud2 = sorted(laptops_by_similarity, key=lambda tupla: tupla[2][0])
+    mas_similar = next(laptop for laptop in laptops_por_similitud if laptop != laptop1 and laptop != laptop2)
+    mas_similar2 = next(laptop for laptop in laptops_por_similitud2 if laptop != laptop1 and laptop != laptop2)
+    return mas_similar, mas_similar2
 
 
 def similarity_score(laptop1: Laptop, laptop2: Laptop):
     return evaluate_fitness(laptop1, laptop2)
 
 
-def evaluate_fitness(laptop: Laptop, ideal_laptop: Laptop) -> int:
+def evaluate_fitness(laptop: Laptop, ideal_laptop: Laptop) -> Tuple[int]:
     """Evaluate how good of a match is a laptop against a given laptop
 
     It is expected to freeze the ideal_laptop argument once it's defined by the user
@@ -71,7 +65,7 @@ def evaluate_fitness(laptop: Laptop, ideal_laptop: Laptop) -> int:
     else:
         fitness += 1
 
-    if laptop.display_size > ideal_laptop.display_size:
+    if laptop.display_size < ideal_laptop.display_size:
         fitness -= 0.5
     else:
         fitness += 0.5
@@ -82,16 +76,15 @@ def evaluate_fitness(laptop: Laptop, ideal_laptop: Laptop) -> int:
         else:
             fitness += 1
 
-    return fitness
+    return (fitness, )
 
 
-def initialize_entities():
+def create_entities(ideal_laptop):
     """Create entities required for the genetic algorithm
 
     - Individual with fitness, and domain attributes
     - Function that creates individuals given a set of attributes (population generator)
     """
-    toolbox = base.Toolbox()
 
     # Create Laptop class with fitness attribute to save individual aptitude
     creator.create("FitnessMax", base.Fitness, weights=(1.0, ))
@@ -104,61 +97,99 @@ def initialize_entities():
     # In this case the criteria is hardcoding params
     # But it will be a method that reads a laptopt database and generates from there
     def create_individual(creator_class: Type[Laptop], **laptop_keyword_args):
-        return creator_class(**laptop_keyword_args)
+        return db.get_random()  # No genera todas
 
     toolbox.register("laptop", create_individual, creator.Laptop)
+    toolbox.register(
+        "population",
+        tools.initRepeat,
+        list,
+        toolbox.laptop
+        # Notice we don't fix the last argument of
+        # tools.initRepeat, that is the amount of individuals of our population
+    )
+
+    # 'Acer Aspire 3 15.6" U$D445 2.4Kg'
+    evaluate = functools.partial(evaluate_fitness, ideal_laptop=ideal_laptop)
+
+    toolbox.register("evaluate", evaluate)
+    toolbox.register("mate", mate)
+    toolbox.register("mutate", tools.mutFlipBit, indpb=0)  # indpb: Independent probability of each integer of being mutated
+    toolbox.register("select", tools.selTournament, tournsize=10)
 
     return toolbox
 
 
-def get_best_match():
-    # Create your ideal laptop
-    extra_args = {
-        "cpu": 'i5',
-        "has_dedicated_gpu": False,
-        "ram": 8,
-        "storage_in_gb": 512,
-        "operating_system": "Windows",
-    }
-    my_ideal_laptop = Laptop(name='ideal', price=2500, weight=2, display_size=15, **extra_args)
-
-    # Load laptops from csv
-    laptops = load_laptops()
-
-    # Freeze the argument of the ideal laptop in the evaluate function
-    # So that it takes only one argument, as expected by deap library
-    evaluate = functools.partial(evaluate_fitness, ideal_laptop=my_ideal_laptop)
-
-    print(laptops[0].name, evaluate(laptops[0]))
-    print(laptops[1].name, evaluate(laptops[1]))
-    print(laptops[2].name, evaluate(laptops[2]))
-
-    laps = laptops[:3]
-    sorted_laptops = sorted(laps, key=evaluate, reverse=True)
-    print('Sorted Laptops by score', list(map(str, sorted_laptops)))
-    print('Best Match: ', sorted_laptops[0])
+def evaluate_population(population):
+    # Calculate fitness for each individual
+    fitnesses = map(toolbox.evaluate, population)
+    for individual, fitness_values in zip(population, fitnesses):
+        individual.fitness.values = fitness_values
 
 
-def load_laptops2():
-    laptops = load_laptops()
-    db = Database(laptops=laptops)
-    print('Random laptop:', db.get_random())
-    assert isinstance(db.get_random(), type(laptops[0]))
+def main(my_ideal_laptop):
+    create_entities(my_ideal_laptop)
+    population = toolbox.population(n=1000)  # Aca. Que la generacion genere todas,en lugar de N random
+
+    evaluate_population(population)
+
+    mate_probability = 0.5
+    iterations = 0
+    max_fitness = 2.5 if my_ideal_laptop.brand == 'ANY' else 3.5
+    print(max_fitness)
+
+    fits = [ind.fitness.values[0] for ind in population]
+    while max(fits) < max_fitness and iterations < 20:
+        iterations = iterations + 1
+        print("-- Generation %i --" % iterations)
+
+        # Generate a new population of the same length
+        offspring = toolbox.select(population, len(population))
+
+        # Clone the selected individuals
+        offspring = list(map(toolbox.clone, offspring))
+
+        for child1, child2 in zip(offspring[::2], offspring[1::2]):
+            if random.random() < mate_probability:
+                toolbox.mate(child1, child2)
+                del child1.fitness.values
+                del child2.fitness.values
+
+        # Now that individuals changed, the mutation is no longer representative.
+        # Let's recalculate it
+        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
+        fitnesses = map(toolbox.evaluate, invalid_ind)
+        for ind, fit in zip(invalid_ind, fitnesses):
+            ind.fitness.values = fit
+
+        population[:] = offspring
+
+        # Gather all the fitnesses in one list and print the stats
+        fits = [ind.fitness.values[0] for ind in population]
+        best = sorted([x for x in population], key=lambda ind: ind.fitness.values[0])
+        print('mejores', [(x.name, x.fitness.values[0]) for x in best[:5]])
+
+        length = len(population)
+        mean = sum(fits) / length
+        sum2 = sum(x * x for x in fits)
+        std = abs(sum2 / length - mean ** 2) ** 0.5
+
+        print("  Min %s" % min(fits))
+        print("  Max %s" % max(fits))
+        print("  Avg %s" % mean)
+        print("  Std %s" % std)
+
+    best = max([x for x in population], key=lambda p: p.fitness.values[0])
+    print(best)
 
 
-def main():
-    # Crear poblacion
-    # Cruzar
-    # Mutar (prob=0)
-    # Seleccionar nueva poblacion
-    # Cortar cuando pasa algo. Elegi un optimo, o freno por cant iteraciones
-    pass
+def thebest(my_ideal_laptop):
+    for l in db.laptops:
+        l.fitness.values = evaluate_fitness(l, my_ideal_laptop)
+
+    scored = sorted(db.laptops, key=lambda lap: lap.fitness.values[0])
+    print([f'{x.name} {x.fitness.values[0]}' for x in scored[:5]])
 
 
-laptops = load_laptops()
-db = Database(laptops=laptops)
-print(laptops[0])
-print(laptops[-1])
-lap1, lap2 = mate(db, laptops[0], laptops[-1])
-print(lap1)
-print(lap2)
+my_ideal_laptop = Laptop(name='Pavilion', price=2000, weight=5, display_size=13, brand='ANY')
+main(my_ideal_laptop)

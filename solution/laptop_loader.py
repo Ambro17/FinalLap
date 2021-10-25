@@ -5,6 +5,8 @@ from dataclasses import dataclass, is_dataclass
 from pathlib import Path
 from typing import Optional
 import dataclasses
+from deap import base
+
 
 
 class EnhancedJSONEncoder(json.JSONEncoder):
@@ -17,25 +19,22 @@ class EnhancedJSONEncoder(json.JSONEncoder):
 PARENT = Path(__file__).absolute().parent
 
 
+class MyFitness(base.Fitness):
+    weights = (1.0, )
+
+
 @dataclass
 class Laptop:
     name: str
     price: int
     weight: float
     display_size: float
-
-    cpu: str
-    has_dedicated_gpu: bool
-    ram: int
-    storage_in_gb: int
-    operating_system: str
-
     brand: Optional[str] = 'ANY'
+    fitness: int = MyFitness(values=(-100, ))
 
     def __str__(self):
         return (
-            f'{self.brand} {self.name} {self.cpu} {self.ram}GB '
-            f'{self.storage_in_gb}GB {self.display_size}" {self.operating_system}'
+            f'{self.brand} {self.name} {self.display_size}" U$D{self.price} {self.weight}Kg'
         )
 
 
@@ -60,11 +59,6 @@ def load_laptops():
                         weight=float(row['Weight'].split('k')[0]),  # '1kg -> 2; 4kks -> 4'
                         display_size=float(row['Screen Size'].replace('"', '')),  # Remove inches symbol
                         brand=row['Manufacturer'],
-                        cpu=row['CPU'],
-                        has_dedicated_gpu=bool('Intel' not in row['GPU']),
-                        ram=int(row['RAM'].split('GB')[0]),
-                        storage_in_gb=parse_storage(row['Storage']),
-                        operating_system=row['Operating System']
                     )
                 )
 
