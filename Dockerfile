@@ -17,3 +17,6 @@ WORKDIR /app
 # python solution/domain.py
 # python solution/main.py
 CMD ["/bin/bash"]
+
+
+# docker run ambro17/tpia

@@ -45,6 +45,7 @@ def create_world(attributes_array_len):
     )
     return world
 
+
 NUMBERS_ARRAY_LEN = 100 
 world = create_world(NUMBERS_ARRAY_LEN)
 
@@ -53,6 +54,7 @@ def evaluate_individual(individual):
     # As it inherits from list, sum works. 
     # Why a tuple? Because of weights=(1.0,) on our FitnessMax function
     return (sum(individual), )
+
 
 world.register("evaluate", evaluate_individual)
 world.register("mate", tools.cxTwoPoint)  # Cruza
@@ -139,5 +141,5 @@ def mate(mate_probability, offspring):
 
     return offspring
 
-iterations_duration = [main() for x in range(15)]
-print('Average', sum(iterations_duration)/len(iterations_duration))
+
+main()

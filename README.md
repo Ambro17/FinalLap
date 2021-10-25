@@ -13,11 +13,11 @@ Las características que serán evaluadas para encontrar la notebook recomendada
 
 ## TODO
 - [x] Get collection of laptops to populate database - ✅ Done from csv
-- [ ] Create mate algorithm
+- [x] Create mate algorithm
 - [x] Create mutate algorithm (Should we allow invalid laptops? That is, those not in db?) - ✅ Not required
 - [ ] Create select algoritm (Ojo a que optimice y no quede clavado)
 - [ ] Condense into runnable script that executes the genetic algorithm
-
+- [ ] Hacer el informe
 
 ## Implementación
 

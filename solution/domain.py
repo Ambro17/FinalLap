@@ -3,6 +3,7 @@ import random
 from typing import Type, List
 from deap import base
 from deap import creator
+from pprint import pprint
 
 from laptop_loader import load_laptops, Laptop
 
@@ -17,8 +18,40 @@ class Database:
 
     def mate(self, one_laptop, other_laptop):
         """Return an existing laptop with intersection of attributes from the two laptops"""
-        # Elijo una DISTINA a estas dos, que exista.
+        # Elijo una DISTINTA a estas dos, que exista.
         # Va a ser mejor o peor?
+
+
+def mate(db: Database, laptop1: Laptop, laptop2: Laptop):
+    # 10 00
+    # 01 11
+    # --|--
+    # 10 11
+    # Parecido a L1
+    # Parecido a L2
+    """
+    Op 1.
+    Agarrar 10 laptops
+    Evaluar la similitud contra la L1 y la L2
+    Quedarnos con las mas parecida a ambas
+    """
+    laptops_bag = [db.get_random() for _ in range(200)]  # TODO: Modificar si optimiza demasiado rapido
+    laptops_by_similarity = [
+        (
+            candidate,
+            similarity_score(laptop1, candidate),
+            similarity_score(laptop2, candidate),
+        )
+        for candidate in laptops_bag
+    ]
+
+    similar_a_1 = max(laptops_by_similarity, key=lambda tupla: tupla[1])
+    similar_a_2 = max(laptops_by_similarity, key=lambda tupla: tupla[2])
+    return similar_a_1[0], similar_a_2[0]
+
+
+def similarity_score(laptop1: Laptop, laptop2: Laptop):
+    return evaluate_fitness(laptop1, laptop2)
 
 
 def evaluate_fitness(laptop: Laptop, ideal_laptop: Laptop) -> int:
@@ -48,7 +81,6 @@ def evaluate_fitness(laptop: Laptop, ideal_laptop: Laptop) -> int:
             fitness -= 1
         else:
             fitness += 1
-
 
     return fitness
 
@@ -106,9 +138,6 @@ def get_best_match():
     print('Sorted Laptops by score', list(map(str, sorted_laptops)))
     print('Best Match: ', sorted_laptops[0])
 
-print('Choosing best laptop 🪄')
-get_best_match()
-
 
 def load_laptops2():
     laptops = load_laptops()
@@ -116,4 +145,20 @@ def load_laptops2():
     print('Random laptop:', db.get_random())
     assert isinstance(db.get_random(), type(laptops[0]))
 
-load_laptops2()
+
+def main():
+    # Crear poblacion
+    # Cruzar
+    # Mutar (prob=0)
+    # Seleccionar nueva poblacion
+    # Cortar cuando pasa algo. Elegi un optimo, o freno por cant iteraciones
+    pass
+
+
+laptops = load_laptops()
+db = Database(laptops=laptops)
+print(laptops[0])
+print(laptops[-1])
+lap1, lap2 = mate(db, laptops[0], laptops[-1])
+print(lap1)
+print(lap2)

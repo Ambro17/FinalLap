@@ -13,6 +13,7 @@ class EnhancedJSONEncoder(json.JSONEncoder):
             return dataclasses.asdict(object)
         return super().default(object)
 
+
 PARENT = Path(__file__).absolute().parent
 
 
@@ -22,11 +23,13 @@ class Laptop:
     price: int
     weight: float
     display_size: float
+
     cpu: str
     has_dedicated_gpu: bool
     ram: int
     storage_in_gb: int
     operating_system: str
+
     brand: Optional[str] = 'ANY'
 
     def __str__(self):
