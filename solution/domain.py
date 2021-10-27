@@ -27,7 +27,7 @@ db = Database(laptops=load_laptops())
 
 
 def mate(laptop1: Laptop, laptop2: Laptop):
-    laptops_bag = [db.get_random() for _ in range(50)]
+    laptops_bag = [db.get_random() for _ in range(20)]
     laptops_by_similarity = [
         (
             candidate,
@@ -70,7 +70,7 @@ def evaluate_fitness(laptop: Laptop, ideal_laptop: Laptop) -> Tuple[int]:
     else:
         fitness += 0.5
 
-    if laptop.brand != 'ANY':
+    if ideal_laptop.brand != 'ANY':
         if laptop.brand != ideal_laptop.brand:
             fitness -= 1
         else:
@@ -109,7 +109,6 @@ def create_entities(ideal_laptop):
         # tools.initRepeat, that is the amount of individuals of our population
     )
 
-    # 'Acer Aspire 3 15.6" U$D445 2.4Kg'
     evaluate = functools.partial(evaluate_fitness, ideal_laptop=ideal_laptop)
 
     toolbox.register("evaluate", evaluate)
@@ -136,7 +135,7 @@ def main(my_ideal_laptop):
     mate_probability = 0.5
     iterations = 0
     max_fitness = 2.5 if my_ideal_laptop.brand == 'ANY' else 3.5
-    print(max_fitness)
+    print("Valor ideal:", max_fitness)
 
     fits = [ind.fitness.values[0] for ind in population]
     while max(fits) < max_fitness and iterations < 20:
@@ -167,7 +166,7 @@ def main(my_ideal_laptop):
         # Gather all the fitnesses in one list and print the stats
         fits = [ind.fitness.values[0] for ind in population]
         best = sorted([x for x in population], key=lambda ind: ind.fitness.values[0])
-        print('mejores', [(x.name, x.fitness.values[0]) for x in best[:5]])
+        print('Mejores:', [(x.name, x.fitness.values[0]) for x in best[:5]])
 
         length = len(population)
         mean = sum(fits) / length
@@ -191,5 +190,7 @@ def thebest(my_ideal_laptop):
     print([f'{x.name} {x.fitness.values[0]}' for x in scored[:5]])
 
 
-my_ideal_laptop = Laptop(name='Pavilion', price=2000, weight=5, display_size=13, brand='ANY')
+my_ideal_laptop = Laptop(name='Pavilion', price=2000, weight=5, display_size=13, brand='Chuwi')
+print('Ingresada: ', my_ideal_laptop)
 main(my_ideal_laptop)
+
